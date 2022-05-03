@@ -1,0 +1,2 @@
+docker build -t apitest1.azurecr.io/api_test .
+docker push apitest1.azurecr.io/api_test
