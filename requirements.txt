@@ -11,3 +11,7 @@ starlette==0.17.1
 typing_extensions==4.2.0
 uvicorn==0.17.6
 pydantic==1.9.0
+pandas
+numpy
+matplotlib
+sklearn

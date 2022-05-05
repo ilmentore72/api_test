@@ -1,9 +1,13 @@
-from typing import Optional
+from typing import Optional,List
 import uvicorn
 from fastapi import FastAPI, Response, Request , Body
 from pydantic import BaseModel
-class data_req(BaseModel):
-    UID:str
+class point(BaseModel):
+    lat: str
+    long: str
+class point_arr(BaseModel):
+    list : List[point] = []
+
 class data_res(BaseModel):
     UID:str
     message:str
@@ -15,9 +19,9 @@ def read_root():
     return {"Hello"}
 
 @app.post("/data")
-def return_UID(data:data_req): 
-    print (data)   
-    return{"UID":data.UID, "Message":"POST Success"}
+def return_UID(data:point_arr): 
+    print(data)
+    return data
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Optional[str] = None):
