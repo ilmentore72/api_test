@@ -7,7 +7,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 import nltk
+import cv2
+import time
+import urllib.request
 import string
+import skimage.io as io
 class point(BaseModel):
     lat: float
     long: float
@@ -19,6 +23,16 @@ class data_res(BaseModel):
     message:str
 class spam_data(BaseModel):
     st : str
+def convertToRGB(img):
+    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+def detect_faces(f_cascade, colored_img, scaleFactor=1.1):
+    img_copy = np.copy(colored_img)
+    gray = cv2.cvtColor(img_copy, cv2.COLOR_BGR2GRAY)
+    faces = f_cascade.detectMultiScale(gray, scaleFactor=scaleFactor, minNeighbors=5);
+    for (x, y, w, h) in faces:
+        cv2.rectangle(img_copy, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    return img_copy
 app = FastAPI()
 
 @app.get("/")
@@ -96,6 +110,16 @@ def predict(sms):
 def spam_filter(stri: spam_data):
     pst = pre_process(stri.st)
     return predict(pst)
+@app.post("/face")
+def face_detect(std : spam_data):
+    #print("HEHE" + std.st)
+    img_array = urllib.request.urlopen(std.st)
+    test1 =cv2.imdecode(np.array(bytearray(img_array.read()), dtype=np.uint8), -1)
+    gray_img = cv2.cvtColor(test1, cv2.COLOR_BGR2GRAY)
+    faces = haar_face_cascade.detectMultiScale(gray_img, scaleFactor=1.1, minNeighbors=5)
+    print(len(faces))
+    return len(faces)
+
 if __name__ == "__main__":
     data = pd.read_csv('SMSSpamCollection.txt', sep = '\t', header=None, names=["label", "sms"])
     nltk.download('stopwords')
@@ -105,6 +129,7 @@ if __name__ == "__main__":
     punctuation = string.punctuation
     data['processed'] = data['sms'].apply(lambda x: pre_process(x))
     spam_words, ham_words = categorize_words()
+    haar_face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
 
     uvicorn.run(app,host =  "0.0.0.0", port = 8000)
     

@@ -16,3 +16,4 @@ numpy
 matplotlib
 sklearn
 nltk
+scikit-image
